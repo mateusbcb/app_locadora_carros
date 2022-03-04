@@ -31,4 +31,16 @@ class Modelo extends Model
             'abs'           => 'required|boolean',
         ];
     }
+
+    /* Feedback */
+    // public function Feedback()
+    // {
+
+    // }
+
+    public function marca()
+    {
+        return $this->belongsTo('App\Models\Marca');
+    }
+
 }

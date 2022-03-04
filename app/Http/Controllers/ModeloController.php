@@ -18,9 +18,39 @@ class ModeloController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $modelos = $this->modelo->all();
+        $modelos = [];
+
+        if ( $request->has('atributos_marca') ) {
+            $atributos_marca = $request->atributos_marca;
+
+            $modelos = $this->modelo->with('marca:id,'.$atributos_marca);
+        }else{
+            $modelos = $this->modelo->with('marca');
+        }
+
+        if ( $request->has('filtro') ) {
+            
+            $filtros = explode(';', $request->filtro);
+            
+            foreach ($filtros as $key => $condicao) {
+
+                $c = explode(':', $condicao);
+                $modelos = $modelos->where($c[0], $c[1], $c[2]);
+            }
+
+        }
+
+        if ( $request->has('atributos') ) {
+            $atributos = $request->atributos;
+            
+            $modelos = $modelos->selectRaw($atributos)->get();
+
+        }else {
+            $modelos = $modelos->get();
+        }
+
         
         if (count($modelos) === 0) {
             return response()->json(['erro' => 'Nrnhuma modelo cadastrado'], 404);
@@ -73,7 +103,7 @@ class ModeloController extends Controller
      */
     public function show($id)
     {
-        $modelo = $this->modelo->find($id);
+        $modelo = $this->modelo->with('marca')->find($id);
 
         if ($modelo === null) {
             return response()->json(['erro' => 'Modelo não encontrada'], 404);
@@ -135,15 +165,20 @@ class ModeloController extends Controller
         $imagem     = $request->file('imagem');
         $imagem_urn = $imagem->store('imagens/modelos', 'public');
 
-        $modelo->update([
-            'marca_id'      => $request->marca_id,
-            'nome'          => $request->nome,
-            'imagem'        => $imagem_urn,
-            'numero_portas' => $request->numero_portas,
-            'lugares'       => $request->lugares,
-            'air_bag'       => $request->air_bag,
-            'abs'           => $request->abs,
-        ]);
+        $modelo->fill($request->all());
+        $modelo->imagem = $imagem_urn;
+
+        $modelo->save();
+
+        // $modelo->update([
+        //     'marca_id'      => $request->marca_id,
+        //     'nome'          => $request->nome,
+        //     'imagem'        => $imagem_urn,
+        //     'numero_portas' => $request->numero_portas,
+        //     'lugares'       => $request->lugares,
+        //     'air_bag'       => $request->air_bag,
+        //     'abs'           => $request->abs,
+        // ]);
         
         return response()->json($modelo, 200);
     }
