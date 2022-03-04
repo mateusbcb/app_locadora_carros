@@ -22,7 +22,7 @@ class MarcaController extends Controller
     {
         $marcas = $this->marca->all();
 
-        if ($marcas === null) {
+        if (count($marcas) === 0) {
             return response()->json(['erro' => 'Nrnhuma maraca cadastrada'], 404);
         }
 
@@ -49,12 +49,12 @@ class MarcaController extends Controller
     {
         $request->validate($this->marca->rules(), $this->marca->feedback());
 
-        $imagem = $request->file('imagem');
+        $imagem     = $request->file('imagem');
         $imagem_urn = $imagem->store('imagens', 'public');
 
         $marca = $this->marca->create([
-            'nome' => $request->nome,
-            'imagem' => $imagem_urn,
+            'nome'      => $request->nome,
+            'imagem'    => $imagem_urn,
         ]);
 
         return response()->json($marca, 201);
@@ -127,12 +127,12 @@ class MarcaController extends Controller
             Storage::disk('public')->delete($marca->imagem);
         }
 
-        $imagem = $request->file('imagem');
+        $imagem     = $request->file('imagem');
         $imagem_urn = $imagem->store('imagens', 'public');
 
         $marca->update([
-            'nome' => $request->nome,
-            'imagem' => $imagem_urn,
+            'nome'      => $request->nome,
+            'imagem'    => $imagem_urn,
         ]);
         
         return response()->json($marca, 200);
