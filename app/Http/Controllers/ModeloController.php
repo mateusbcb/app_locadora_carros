@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Modelo;
+use App\Repositories\ModeloRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,43 +21,27 @@ class ModeloController extends Controller
      */
     public function index(Request $request)
     {
-        $modelos = [];
+        $modeloRepository = new ModeloRepository($this->modelo);
 
         if ( $request->has('atributos_marca') ) {
-            $atributos_marca = $request->atributos_marca;
-
-            $modelos = $this->modelo->with('marca:id,'.$atributos_marca);
+            $atributos_modelos = 'marca:id,'.$request->atributos_modelos;
+            
+            $modeloRepository->selectAtributosRegistrosRelecionados($atributos_modelos);
         }else{
-            $modelos = $this->modelo->with('marca');
+            $modeloRepository->selectAtributosRegistrosRelecionados('marca');
         }
 
         if ( $request->has('filtro') ) {
-            
-            $filtros = explode(';', $request->filtro);
-            
-            foreach ($filtros as $key => $condicao) {
 
-                $c = explode(':', $condicao);
-                $modelos = $modelos->where($c[0], $c[1], $c[2]);
-            }
+            $modeloRepository->filtro($request->filtro);
 
         }
 
         if ( $request->has('atributos') ) {
-            $atributos = $request->atributos;
-            
-            $modelos = $modelos->selectRaw($atributos)->get();
-
-        }else {
-            $modelos = $modelos->get();
+            $modeloRepository->selectAtributos($request->atributos);
         }
-
         
-        if (count($modelos) === 0) {
-            return response()->json(['erro' => 'Nrnhuma modelo cadastrado'], 404);
-        }
-
-        return response()->json($modelos, 200);
+        return response()->json($modeloRepository->getResultado(), 200);
     }
 
     /**
