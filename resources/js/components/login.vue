@@ -82,7 +82,7 @@
                 .then(data => {
                     data.token
                     if (data.token) {
-                        document.cookie = 'token='+data.token/*+'SameSite=Lax'*/
+                        document.cookie = 'token='+data.token/*+'SameSite=Lax*'*/
                     }
                 })
                 e.target.submit()
