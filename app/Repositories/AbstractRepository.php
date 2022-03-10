@@ -36,6 +36,11 @@ use Illuminate\Database\Eloquent\Model;
         {
             return $this->model->get();
         }
+
+        public function getResultadoPaginado($numRegistroPorPagina)
+        {
+            return $this->model->paginate($numRegistroPorPagina);
+        }
     }
 
 ?>
